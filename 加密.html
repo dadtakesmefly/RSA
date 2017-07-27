@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+    <!--在线-->
+    <!--<script src="http://passport.cnblogs.com/scripts/jsencrypt.min.js"></script>-->
+    <!--本地-->
+    <script src="jsencrypt.min.js"></script>
+    <script type="text/javascript">
+        // 使用jsencrypt类库加密js方法，
+        function encryptRequest(reqUrl, data, publicKey) {
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey(publicKey);
+            // ajax请求发送的数据对象
+            var sendData = new Object();
+            // 将data数组赋给ajax对象
+            for (var key in data) {
+                sendData[key] = encrypt.encrypt(data[key]);
+            }
+            $.ajax({
+                url: reqUrl,
+                type: 'post',
+
+                //用户名和密码一起
+                //data: sendData,
+
+                //只加密密码，用户名不加密
+                data: {
+                    "username":$('#username').val(),
+                    "password":sendData.password},
+                dataType: 'json',
+                //contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr) {
+                    //console.error('出错了');
+                    console.log(xhr);
+                }
+            });
+
+        }
+
+        // Call this code when the page is done loading.
+        $(function () {
+
+            $('#testme').click(function () {
+
+                var data = [];
+//                data['username'] = $('#username').val();//用户名也加密了
+                data['password'] = $('#password').val();
+
+                var pkey = $('#pubkey').val();
+                encryptRequest('http://192.168.31.248:7070/AXGY_OP/debug', data, pkey);
+            });
+        });
+    </script>
+    <style>
+        input{}
+
+    </style>
+</head>
+<body>
+<form id="form1" runat="server">
+    <div>
+        <label for="pubkey">Public Key 已经被我隐藏</label><br/>
+            <textarea style="display: none" id="pubkey" rows="15" cols="65">
+                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCDbrIgHK8qkz5IfK/A7At4SVZQ
+                31TalDPsc4vzeDVjd5ao46hcf+eOEQNm8jmxxHTm6WPSTy7RDVXG/NI489L9okkd
+                K++kVh2Z9GjBo5jw/n9EYojt8aYyEOc6cMHT2Fv+1smG+X/W2HeXXoJJjcFLSjBe
+                CKx1SoCD4+B2ZiDQ8wIDAQAB
+            </textarea><br/>
+        <label>传递到后台的用户名和密码，点击提交后在控制台network里即可看到加密后的密码</label><br/>
+        用户名:<input id="username" name="username" type="text"><br/>
+        密码:<input id="password" name="passwd" type="password"><br/>
+        <input id="testme" type="button" value="提交" /><br/>
+    </div>
+</form>
+</body>
+</html>
